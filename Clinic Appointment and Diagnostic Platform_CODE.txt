@@ -1,0 +1,106 @@
+title Clinic Appointment and Diagnostic Platform
+doctors[icon: doctor]{
+  id serial pk
+  first_name varchar(50)
+  last_name varchar(50)
+  email varchar(256)
+  phone_number varchar(15)
+  experience int
+  fees int
+
+  created_at timestamp default current_timestamp
+  updated_at timestamp default current_timestamp
+}
+
+speciality[icon: briefcase-medical]{
+  id serial pk
+  name varchar(250)
+}
+
+doctor_speciality[icon: briefcase-medical]{
+  id serial pk
+  doctor_id int fk
+  speciality_id int fk
+  unique(doctor_id,speciality_id)
+}
+
+patients[icon: user]{
+  id serial pk
+  first_name varchar(50)
+  last_name varchar(50)
+  email varchar(256)
+  phone_number varchar(15)
+
+  created_at timestamp default current_timestamp
+  updated_at timestamp default current_timestamp
+}
+
+appointments[icon: bed]{
+  id serial pk
+  patient_id int fk
+  doctor_id int fk
+  reason_for_visit varchar(300)
+  appointment_date timestamp
+  booked_at timestamp 
+  updated_at timestamp 
+
+  status varchar(15) check(status in ('PENDING','CONFIRMED','CANCELLED','COMPLETED'))
+}
+
+consultation[icon: heart-plus]{
+  id serial pk
+  appointment_id int fk
+  doctor_id int fk
+  notes text
+
+  unique(appointment_id)
+}
+
+tests[icon: test-tube]{
+  id serial pk
+  name varchar(200) unique
+  price int
+}
+
+prescribed_tests[icon: test-tube]{
+  id serial pk
+  consultation_id int fk
+  test_id int fk
+
+  unique(consultation_id,test_id)
+}
+
+reports[icon: report]{
+  id serial pk
+  prescribed_test_id int fk
+  result text
+  generate_at timestamp
+}
+
+payments[icon: payment]{
+  id serial pk
+  consultation_id int fk
+  transaction_id varchar(200) unique// razorpay stripe phonepe transaction id
+  amount int check(amount>0)
+  payment_method varchar(50) check(payment_method in ('CREDIT_CARD','DEBIT_CARD','UPI'))
+  status varchar(20) check(status in ('SUCCESSFUL','FAILED','CANCELLED','PENDING'))
+  payment_date timestamp default current_timestamp
+}
+
+doctors.id < doctor_speciality.doctor_id
+speciality.id < doctor_speciality.speciality_id
+
+patients.id < appointments.patient_id
+doctors.id < appointments.doctor_id
+appointments.id - consultation.appointment_id
+doctors.id < consultation.doctor_id
+
+
+consultation.id < prescribed_tests.consultation_id
+tests.id < prescribed_tests.test_id
+
+prescribed_tests.id - reports.prescribed_test_id 
+
+consultation.id < payments.consultation_id
+
+
